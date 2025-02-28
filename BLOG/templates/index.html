@@ -50,57 +50,45 @@
                             </figure>
                         </div>
                         <!-- Post Featured Image End -->
-
+            
                         <!-- Post Item Body Start -->
                         <div class="post-item-body">
-                            <!-- Post Item Content Start -->
                             <div class="post-item-content">
                                 <h3><a href="{% url 'blog-single' article.slug %}">{{ article.titre }}</a></h3>
                             </div>
-                            <!-- Post Item Content End -->
-
-                            <!-- Blog Item Button Start -->
                             <div class="post-item-btn">
                                 <a href="{% url 'blog-single' article.slug %}" class="post-btn">read more</a>
                             </div>
-                            <!-- Blog Item Button End -->
                         </div>
                         <!-- Post Item Body End -->
                     </div>
                     <!-- Post Item End -->
                 </div>
-                {% endfor %}
-
-                <div class="col-lg-12">
-                    <!-- Page Pagination Start -->
-                    <div class="page-pagination wow fadeInUp" data-wow-delay="1.2s">
-                        <ul class="pagination">
-                            {% if page_objet.has_previous %}
-                                <li>
-                                    <a href="?page={{ page_objet.previous_page_number }}">
-                                        <i class="fa-solid fa-angle-left"></i>
-                                    </a>
-                                </li>
-                            {% endif %}
-                
-                            {% for num in page_objet.paginator.page_range %}
-                                <li class="{% if page_objet.number == num %}active{% endif %}">
-                                    <a href="?page={{ num }}">{{ num }}</a>
-                                </li>
-                            {% endfor %}
-                
-                            {% if page_objet.has_next %}
-                                <li>
-                                    <a href="?page={{ page_objet.next_page_number }}">
-                                        <i class="fa-solid fa-angle-right"></i>
-                                    </a>
-                                </li>
-                            {% endif %}
-                        </ul>
-                    </div>
-                    <!-- Page Pagination End -->
+            {% endfor %}
+            
+            <!-- Pagination -->
+            <div class="col-lg-12">
+                <div class="page-pagination wow fadeInUp" data-wow-delay="1.2s">
+                    <ul class="pagination">
+                        {% if page_objet.has_previous %}
+                            <li><a href="?page=1"><i class="fa-solid fa-angle-double-left"></i></a></li>
+                            <li><a href="?page={{ page_objet.previous_page_number }}"><i class="fa-solid fa-angle-left"></i></a></li>
+                        {% endif %}
+            
+                        {% for num in page_objet.paginator.page_range %}
+                            <li class="{% if page_objet.number == num %}active{% endif %}">
+                                <a href="?page={{ num }}">{{ num }}</a>
+                            </li>
+                        {% endfor %}
+            
+                        {% if page_objet.has_next %}
+                            <li><a href="?page={{ page_objet.next_page_number }}"><i class="fa-solid fa-angle-right"></i></a></li>
+                            <li><a href="?page={{ page_objet.paginator.num_pages }}"><i class="fa-solid fa-angle-double-right"></i></a></li>
+                        {% endif %}
+                    </ul>
                 </div>
-                
+            </div>
+            
             </div>
         </div>
     </div>

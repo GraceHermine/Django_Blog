@@ -53,6 +53,8 @@ class Article(models.Model):
     couverture = models.ImageField(upload_to="articles")
     resume = models.TextField()
     contenu = CKEditor5Field('Text', config_name='extends')
+    # slug = models.SlugField(default="", null=False)
+    slug = models.SlugField(unique=True, blank=True, null=True)
 
     statut = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -63,31 +65,16 @@ class Article(models.Model):
     tag_ids = models.ManyToManyField('BLOG.Tag', related_name="tag_article_ids", verbose_name="Tags")
     est_pulie = models.BooleanField(default=False)
     date_de_publication = models.DateField(auto_now=True)
-    slug = models.SlugField(unique=True, blank=True)
-    
-   
-#La méthode save est une méthode intégrée dans les modèles
+    # slug = models.SlugField(unique=True, blank=True)
+
+    #La méthode save est une méthode intégrée dans les modèles
 #  Django qui est appelée lorsque vous enregistrez un objet
     def save(self, *args, **kwargs):
         if not self.slug:
-            #génère un slug à partir du titre de l'article en utilisant la fonction
             self.slug = slugify(self.titre)
-            # La fonction slugify transforme le titre en une version URL-friendly, 
-            # remplaçant les espaces et les caractères spéciaux 
-            # par des tirets et des caractères ASCII.
         super().save(*args, **kwargs)
-        #La ligne super().save(*args, **kwargs) appelle la méthode save
-        #  de la classe parente
-        #  (le modèle de base de Django) pour effectuer la sauvegarde
-        #  réelle de l'objet dans la base de données. a ton model
 
-    # def save(self, *args, **kwargs):
-    #     for article in Article.objects.all():
-    #         if not article.slug:
-    #             article.slug = slugify(article.titre)
-    #         while Article.objects.filter(slug=article.slug).exists():
-    #             article.slug = f"{article.slug}-{article.id}"
-    #         article.save()
+
 
     def __str__(self):
         return self.titre
@@ -158,15 +145,3 @@ class Team(models.Model):
     def __str__(self):
         return self.nom
     
-class Formulaire(forms.Form):
-    nom = forms.CharField(max_length=100, label= "NOM")
-    email = forms.EmailField(label="Adresse Email")
-    numero = forms.CharField(max_length=10, label="Numéro de Téléphone")
-    message = forms.CharField(widget=forms.Textarea, label="Vôtre Message")
-
-    statut = models.BooleanField(default=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    last_updated_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return self.nom

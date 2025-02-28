@@ -85,7 +85,17 @@
                                 </div>
                             </div>
                         </div>
+                        <br>
+                        {% for commentaire in article.article_commentaire_ids.all %}
+                            <h6>{{ commentaire.auteur_id}}</h6>, <span>{{ commentaire.created_at }}</span><br>
+                            <p>{{ commentaire.contenu }}</p>
+                        {% endfor %}
                         <!-- Post Tag Links End -->
+                        <form action="" method="POST">
+                            {% csrf_token %}
+                            {{ comment_form}} 
+                            <input type="submit" value="Submit">
+                        </form>
                     </div>
                     <!-- Post Single Content End -->
                 </div>

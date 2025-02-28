@@ -1,60 +1,32 @@
-from django.shortcuts import render,redirect
-from django.core.mail import send_mail
-from django.contrib import messages
+
+from BLOG.models import Article,Vission,Team,About,Commentaire
 from django.core.paginator import Paginator
-from django.shortcuts import render, get_object_or_404
-from BLOG.models import Article,Vission,Team,About,Formulaire
+from django.shortcuts import get_object_or_404, render
 from django.utils.text import slugify
-from django.db.models import Count
+from django.http import Http404
+from BLOG.forms import CommentaireForm
 
 
 
 def index(request):
-    articles = Article.objects.filter(est_pulie=True)  # Filtrer les articles publiés
-    pagination = Paginator(articles, 6)  # 6 articles par page
-    numero_page = request.GET.get('page')
-    page_objet = pagination.get_page(numero_page)
-
+    articles = Article.objects.filter(est_pulie=True) 
+    paginator = Paginator(articles, 3)  
+    page_number = request.GET.get('page')  
+    page_objet = paginator.get_page(page_number) 
     datas = {
-        'active_index': 'active',
-        'page_objet': page_objet,
+        'active_index' : 'active',
+        # 'articles' : articles,
+        'page_objet': page_objet, 
     }
 
     return render(request, 'index.html', datas)
 
-# def article_detail(request, slug):
-#     article = get_object_or_404(Article, slug=slug)  # Utilisation de get_object_or_404
-#     return render(request, 'article_detail.html', {'article': article})
-
-
 def contact(request):
-    if request.method == 'POST':
-        form = Formulaire(request.POST)
-        if form.is_valid():
-            form.save()
-            nom = form.cleaned_data['nom']
-            email = form.cleaned_data['email']
-            phone = form.cleaned_data['phone']
-            message = form.cleaned_data['message']
-
-            send_mail(
-                'Merci pour votre message',
-                f'Bonjour {nom},\n\nMerci pour votre message. Nous vous répondrons bientôt.',
-                'hermine@monsite.com',
-                [email],
-                fail_silently=False,
-            )
-
-            messages.success(request, 'Merci pour votre message, nous vous répondrons bientôt.')
-            return redirect('contact')  
-    else:
-        form = Formulaire()  
-
     datas = {
-        'active_contact': 'active',
-        'form': form,
+        'active_contact' : 'active',
+
     }
-    return render(request, 'contact.html', datas)
+    return render (request, 'contact.html', datas)
 
 
 def blog(request,):
@@ -68,20 +40,32 @@ def blog(request,):
 
 
 def blog_single(request, slug):
-    duplicates = Article.objects.values('slug').annotate(count=Count('slug')).filter(count__gt=1)
-    print(duplicates)
-    # article =Article.objects.get(pk=pk)
-    article = get_object_or_404(Article, slug=slug)
+    articles = Article.objects.filter(slug=slug)  # Utilise filter() pour récupérer un queryset
+    form = CommentaireForm()
+    if not articles.exists():
+        raise Http404("Article not found")  # Si aucun article n'est trouvé 
+    article = articles.first()  # Si plusieurs articles existent, on récupère le premier
+    # Mettre à jour le slug si le titre a changé
     if article.titre != article.slug:
         article.slug = slugify(article.titre)
-        article.save()  # Sauvegarde l'article avec le nouveau slug
+        article.save() 
+
+    if request.method == "POST":
+        contenu = request.POST["contenu"]
+        
+        commentaire = Commentaire()
+        commentaire.auteur_id = request.user
+        commentaire.article_id = article
+        commentaire.contenu = contenu
+        commentaire.save()
 
     datas = {
-        'active_blog' : 'active',
-        'article':article,
-
+        'active_blog': 'active',
+        'article': article,
+        'comment_form': form
     }
-    return render (request, 'blog-single.html', datas)
+    
+    return render(request, 'blog-single.html', datas)
 
 
 def about(request):
