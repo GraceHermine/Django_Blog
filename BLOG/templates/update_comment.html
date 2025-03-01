@@ -1,0 +1,12 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Modifier Commentaire{% endblock %}
+
+{% block content %}
+    <h3>Modifier votre commentaire</h3>
+    <form action="" method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-success">Mettre à jour</button>
+    </form>
+{% endblock %}

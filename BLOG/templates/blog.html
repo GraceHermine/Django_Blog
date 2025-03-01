@@ -15,6 +15,7 @@
 				<div class="col-lg-12">
 					<!-- Page Header Box Start -->
 					<div class="page-header-box">
+                        
 						<h1 class="text-anime-style-2" data-cursor="-opaque">Our blog</h1>
 						<nav class="wow fadeInUp">
 							<ol class="breadcrumb">
@@ -36,37 +37,34 @@
             <div class="row">
                 {% for produit in produits %}
                 <div class="col-lg-4 col-md-6">
-                    <!-- Post Item Start -->
                     <div class="post-item wow fadeInUp">
-                        <!-- Post Featured Image Start-->
                         <div class="post-featured-image">
                             <figure>
-                                <a href="{% url 'blog-single' produit.pk %}" class="image-anime" data-cursor-text="View">
+                                <a href="{% url 'blog-single' produit.slug %}" class="image-anime" data-cursor-text="View">
                                     <img src="{{ produit.couverture.url }}" alt="">
                                 </a>
                             </figure>
                         </div>
-                        <!-- Post Featured Image End -->
-
-                        <!-- Post Item Body Start -->
                         <div class="post-item-body">
-                            <!-- Post Item Content Start -->
                             <div class="post-item-content">
-                                <h3><a href="{% url 'blog-single' produit.pk %}">{{ produit.titre }}</a></h3>
+                                <h3><a href="{% url 'blog-single' produit.slug %}">{{ produit.titre }}</a></h3>
                             </div>
-                            <!-- Post Item Content End -->
-
-                            <!-- Blog Item Button Start -->
                             <div class="post-item-btn">
-                                <a href="{% url 'blog-single' produit.pk %}" class="post-btn">read more</a>
+                                <a href="{% url 'blog-single' produit.slug %}" class="post-btn">read more</a>
                             </div>
-                            <!-- Blog Item Button End -->
                         </div>
-                        <!-- Post Item Body End -->
+
+                        {% if produit.auteur == request.user %}
+                            <div class="post-item-btn">
+                                <a href="{% url 'update_article' produit.id %}" class="btn btn-warning btn-sm">Modifier</a>
+                                <a href="{% url 'delete_article' produit.id %}" class="btn btn-danger btn-sm"
+                                onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet article ?');">Supprimer</a>
+                            </div>
+                        {% endif %}
                     </div>
-                    <!-- Post Item End -->
                 </div>
                 {% endfor %}
+
 
 
                 <div class="col-lg-12">
@@ -81,6 +79,9 @@
                         </ul>
                     </div>
                     <!-- Page Pagination End -->
+                </div>
+                <div class="col-lg-12">
+                    <a href="{% url 'soumettre_article' %}" class="btn ">Ajouter un article</a>
                 </div>
             </div>
         </div>

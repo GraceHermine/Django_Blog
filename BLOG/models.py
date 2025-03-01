@@ -63,7 +63,7 @@ class Article(models.Model):
     auteur_id = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name="auteur_article_ids")
     categorie_id = models.ForeignKey('BLOG.Categorie', on_delete=models.SET_NULL, null=True, related_name="auteur_article_ids", verbose_name="Catégories")
     tag_ids = models.ManyToManyField('BLOG.Tag', related_name="tag_article_ids", verbose_name="Tags")
-    est_pulie = models.BooleanField(default=False)
+    est_pulie = models.BooleanField(default=True)
     date_de_publication = models.DateField(auto_now=True)
     # slug = models.SlugField(unique=True, blank=True)
 
@@ -86,7 +86,7 @@ class Commentaire(models.Model):
         verbose_name_plural = "commentaires"
 
     auteur_id = models.ForeignKey(User, on_delete= models.SET_NULL, null=True, related_name="auteur_commentaire_ids")
-    article_id = models.ForeignKey('BLOG.Article', on_delete= models.CASCADE, related_name="auteur_commentaire_ids")
+    article_id = models.ForeignKey('BLOG.Article', on_delete= models.CASCADE, related_name="article_commentaire_ids")
     contenu = CKEditor5Field('Text', config_name='extends')
 
      # Standards

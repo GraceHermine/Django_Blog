@@ -1,0 +1,44 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Soumettre un article{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h2 class="text-center mb-4">Soumettre un nouvel article</h2>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <form method="POST" enctype="multipart/form-data" class="card p-4 shadow-lg">
+                {% csrf_token %}
+
+                <div class="form-group mb-3">
+                    <label for="id_titre" class="form-label">Titre</label>
+                    {{ form.titre }}
+                </div>
+
+                <div class="form-group mb-3">
+                    <label for="contenu" class="form-label">contenu</label>
+                    {{ form.contenu }}
+                </div>
+                
+                <div class="form-group mb-3">
+                    <label for="resume" class="form-label">resume</label>
+                    {{ form.resume }}
+                </div>
+
+                <div class="form-group mb-3">
+                    <label for="id_couverture" class="form-label">Image de couverture</label>
+                    {{ form.couverture }}
+                </div>
+
+                <div class="form-group mb-3">
+                    <label for="id_tag_ids" class="form-label">Tags</label>
+                    {{ form.tag_ids }}
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100">Soumettre</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

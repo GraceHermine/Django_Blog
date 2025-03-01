@@ -1,107 +1,173 @@
 {% extends 'base/base.html' %}
 {% load static %}
 
-{%  block title %}
-	<!-- Page Title -->
+{% block title %}
     <title>Inspaire - {{ article.titre }}</title>
-{%  endblock title %}
+{% endblock title %}
 
-    {%  block content %}
-    <!-- Page Header Start -->
-	<div class="page-header parallaxie">
-		<div class="container">
-			<div class="row">
-				<div class="col-lg-12">
-					<!-- Page Header Box Start -->
-					<div class="page-header-box">
-						<h1 class="text-anime-style-2" data-cursor="-opaque">{{ article.titre|truncatechars:30 }}</h1>
-						<nav class="wow fadeInUp">
-							<ol class="breadcrumb">
-								<li class="breadcrumb-item"><a href="{% url 'index' %}">home</a></li>
-								<li class="breadcrumb-item"><a href="blog-2.html">blog</a></li>
-								<li class="breadcrumb-item active" aria-current="page">{{ article.titre }}</li>
-							</ol>
-						</nav>
-					</div>
-					<!-- Page Header Box End -->
-				</div>
-			</div>
-		</div>
-	</div>
-	<!-- Page Header End -->
-
-    <!-- Page Single Post Start -->
-    <div class="page-single-post">
-        <div class="container">
-            <div class="row">
-                
-                <div class="col-lg-12">
-                    <!-- Post Featured Image Start -->
-                    <div class="post-image">
-                        <figure class="image-anime reveal">
-                            {% if article.couverture %}
-                            <img src="{{ article.couverture.url }}" alt="">
-                            {% endif %}
-                        </figure>
-                    </div>
-                    <!-- Post Featured Image Start -->
-
-                    <!-- Post Single Content Start -->
-                    <div class="post-content">
-                        <!-- Post Entry Start -->
-                        <div class="post-entry">
-                           {{ article.contenu|safe }}
-                        </div>
-                        <!-- Post Entry End -->
-
-                        <!-- Post Tag Links Start -->
-                        <div class="post-tag-links">
-                            <div class="row align-items-center">
-                                <div class="col-lg-8">
-                                    <!-- Post Tags Start -->
-                                    <div class="post-tags wow fadeInUp" data-wow-delay="0.5s">
-                                        <span class="tag-links">
-                                            Tags:
-                                            {% for tag in article.tag_ids.all %}
-                                            <a href="#">{{ tag.nom }}</a>
-                                            {% endfor %}
-                                            
-                                        </span>
-                                    </div>
-                                    <!-- Post Tags End -->
-                                </div>
-
-                                <div class="col-lg-4">
-                                    <!-- Post Social Links Start -->
-                                    <div class="post-social-sharing wow fadeInUp" data-wow-delay="0.5s">
-                                        <ul>
-                                            <li><a href="#"><i class="fa-brands fa-facebook-f"></i></a></li>
-                                            <li><a href="#"><i class="fa-brands fa-linkedin-in"></i></a></li>
-                                            <li><a href="#"><i class="fa-brands fa-instagram"></i></a></li>
-                                            <li><a href="#"><i class="fa-brands fa-x-twitter"></i></a></li>
-                                        </ul>
-                                    </div>
-                                    <!-- Post Social Links End -->
-                                </div>
-                            </div>
-                        </div>
-                        <br>
-                        {% for commentaire in article.article_commentaire_ids.all %}
-                            <h6>{{ commentaire.auteur_id}}</h6>, <span>{{ commentaire.created_at }}</span><br>
-                            <p>{{ commentaire.contenu }}</p>
-                        {% endfor %}
-                        <!-- Post Tag Links End -->
-                        <form action="" method="POST">
-                            {% csrf_token %}
-                            {{ comment_form}} 
-                            <input type="submit" value="Submit">
-                        </form>
-                    </div>
-                    <!-- Post Single Content End -->
+{% block content %}
+<!-- Page Header Start -->
+<div class="page-header parallaxie">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <!-- Page Header Box Start -->
+                <div class="page-header-box">
+                    <h1 class="text-anime-style-2" data-cursor="-opaque">{{ article.titre|truncatechars:30 }}</h1>
+                    <nav class="wow fadeInUp">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="{% url 'index' %}">home</a></li>
+                            <li class="breadcrumb-item"><a href="blog-2.html">blog</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">{{ article.titre }}</li>
+                        </ol>
+                    </nav>
                 </div>
-                
+                <!-- Page Header Box End -->
             </div>
         </div>
     </div>
-    <!-- Page Single Post End -->
-    {%  endblock content %}
+</div>
+<!-- Page Header End -->
+
+<!-- Page Single Post Start -->
+<div class="page-single-post">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <!-- Post Featured Image Start -->
+                <div class="post-image">
+                    <figure class="image-anime reveal">
+                        {% if article.couverture %}
+                            <img src="{{ article.couverture.url }}" alt="">
+                        {% endif %}
+                    </figure>
+                </div>
+                <!-- Post Featured Image End -->
+
+                <!-- Post Single Content Start -->
+                <div class="post-content">
+                    <!-- Post Entry Start -->
+                    <div class="post-entry">
+                        {{ article.contenu|safe }}
+                    </div>
+                    <!-- Post Entry End -->
+
+                    <!-- Post Tag Links Start -->
+                    <div class="post-tag-links">
+                        <div class="row align-items-center">
+                            <div class="col-lg-8">
+                                <div class="post-tags wow fadeInUp" data-wow-delay="0.5s">
+                                    <span class="tag-links">
+                                        Tags:
+                                        {% for tag in article.tag_ids.all %}
+                                            <a href="#">{{ tag.nom }}</a>
+                                        {% endfor %}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="post-social-sharing wow fadeInUp" data-wow-delay="0.5s">
+                                    <ul>
+                                        <li><a href="#"><i class="fa-brands fa-facebook-f"></i></a></li>
+                                        <li><a href="#"><i class="fa-brands fa-linkedin-in"></i></a></li>
+                                        <li><a href="#"><i class="fa-brands fa-instagram"></i></a></li>
+                                        <li><a href="#"><i class="fa-brands fa-x-twitter"></i></a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Post Tag Links End -->
+
+                    
+
+                    <!-- Bouton pour afficher les commentaires -->
+                    <!-- Page Single Post Start -->
+                    <div class="page-single-post">
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <!-- Contenu de l'article -->
+                                    <div class="post-content">
+                                        <!-- Contenu de l'article ici -->
+
+                                        <br>
+
+                                        <!-- Bouton pour afficher les commentaires -->
+                                        <button id="toggle-comments" class="btn btn-primary">Afficher les commentaires</button>
+
+                                        <!-- Section des commentaires (cachée au début) -->
+                                        <div id="comment-section" style="display: none; margin-top: 20px;">
+                                            <!-- Affichage des commentaires -->
+                                            <h3>Commentaires</h3>
+                                            {% for commentaire in commentaires %}
+                                                <div class="comment-box">
+                                                    <h6>{{ commentaire.auteur_id.username }}</h6>
+                                                    <span>{{ commentaire.created_at|date:"d M Y H:i" }}</span>
+                                                    <p>{{ commentaire.contenu }}</p>
+
+                                                    {% if request.user == commentaire.auteur_id %}
+                                                        <a href="{% url 'update_comment' commentaire.id %}" class="btn btn-warning btn-sm">Modifier</a>
+                                                        <a href="{% url 'delete_comment' commentaire.id %}" class="btn btn-danger btn-sm" 
+                                                        onclick="return confirm('Voulez-vous vraiment supprimer ce commentaire ?');">Supprimer</a>
+                                                    {% endif %}
+                                                </div>
+                                                <hr>
+                                            {% empty %}
+                                                <p>Aucun commentaire pour le moment.</p>
+                                            {% endfor %}
+
+                                            <!-- Formulaire pour ajouter un commentaire -->
+                                            <div class="row">
+                                                <div class="col-lg-6">
+                                                    <div class="contact-us-form">
+                                                        <div class="section-title">
+                                                            <h3 class="wow fadeInUp">Ajouter un commentaire</h3>
+                                                            
+                                                        </div>
+
+                                                        <form action="" method="POST">
+                                                            {% csrf_token %}
+                                                            <div class="contact-form">
+                                                                <div class="form-group col-md-12 mb-4">
+                                                                    <textarea name="contenu" class="form-control" id="contenu" rows="4" placeholder="Votre commentaire*" required></textarea>
+                                                                    <div class="help-block with-errors"></div>
+                                                                </div>
+                                                                <div class="col-md-12">
+                                                                    <button type="submit" class="btn btn-primary">Publier</button>
+                                                                </div>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Page Single Post End -->
+                </div>
+                <!-- Post Single Content End -->
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Page Single Post End -->
+
+<!-- Script pour gérer l'affichage des commentaires -->
+<script>
+    document.getElementById("toggle-comments").addEventListener("click", function() {
+        var commentSection = document.getElementById("comment-section");
+        if (commentSection.style.display === "none") {
+            commentSection.style.display = "block";
+            this.textContent = "Masquer";
+        } else {
+            commentSection.style.display = "none";
+            this.textContent = "commentaires";
+        }
+    });
+</script>
+
+{% endblock content %}
