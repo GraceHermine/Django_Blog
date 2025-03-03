@@ -1,12 +1,18 @@
-{% extends 'base/base.html' %}
-
-{% block title %}Modifier Commentaire{% endblock %}
+{% extends "base/base.html" %}
 
 {% block content %}
-    <h3>Modifier votre commentaire</h3>
-    <form action="" method="POST">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="btn btn-success">Mettre à jour</button>
-    </form>
+<div class="container mt-5">
+    <h2 class="text-center">Modifier votre commentaire</h2>
+    <div class="card shadow-lg p-4">
+        <form method="POST">
+            {% csrf_token %}
+            <div class="mb-3">
+                {{ form.contenu.label_tag }}
+                {{ form.contenu }}
+            </div>
+            <button type="submit" class="btn btn-success">Enregistrer</button>
+            <a href="{% url 'blog-single' slug=commentaire.article_id.slug %}" class="btn btn-secondary">Annuler</a>
+        </form>
+    </div>
+</div>
 {% endblock %}

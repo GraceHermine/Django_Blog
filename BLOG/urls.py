@@ -10,7 +10,8 @@ urlpatterns = [
     path("about/", views.about, name="about"),
     path('comment/update/<int:comment_id>/', views.update_comment, name='update_comment'),
     path('comment/delete/<int:comment_id>/', views.delete_comment, name='delete_comment'),
-    path('soumettre/', views.submit_article, name='soumettre_article'),
-    path('update/<int:article_id>/', views.update_article, name='update_article'),
-    path('delete/<int:article_id>/', views.delete_article, name='delete_article'),
+    path("ajouter-article/", views.ajouter_article, name='ajouter_article'),
+    path("mes-articles/", views.mes_articles, name='mes_articles'),
+    path("modifier-article/<int:article_id>/", views.modifier_article, name='modifier_article'),
+    path("supprimer-article/<int:article_id>/", views.supprimer_article, name='supprimer_article'),
 ]

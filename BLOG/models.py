@@ -53,7 +53,7 @@ class Article(models.Model):
     couverture = models.ImageField(upload_to="articles")
     resume = models.TextField()
     contenu = CKEditor5Field('Text', config_name='extends')
-    # slug = models.SlugField(default="", null=False)
+   
     slug = models.SlugField(unique=True, blank=True, null=True)
 
     statut = models.BooleanField(default=True)
@@ -65,9 +65,10 @@ class Article(models.Model):
     tag_ids = models.ManyToManyField('BLOG.Tag', related_name="tag_article_ids", verbose_name="Tags")
     est_pulie = models.BooleanField(default=True)
     date_de_publication = models.DateField(auto_now=True)
-    # slug = models.SlugField(unique=True, blank=True)
+    
 
     #La méthode save est une méthode intégrée dans les modèles
+    
 #  Django qui est appelée lorsque vous enregistrez un objet
     def save(self, *args, **kwargs):
         if not self.slug:

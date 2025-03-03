@@ -240,7 +240,8 @@ EMAIL_BACKEND='django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST='smtp.gmail.com'
 EMAIL_PORT=587
 EMAIL_USE_TLS=True
-EMAIL_HOST_USER='dedjenehermine@gmail.com'
-EMAIL_HOST_PASSWORD='11111111111'
-DEFAULT_FROM_EMAIL="dedjenehermine@gmail.com"
+EMAIL_HOST_USER='dedjeneg@gmail.com'
+EMAIL_HOST_PASSWORD='blll ohvc kels mlef'
+DEFAULT_FROM_EMAIL="dedjeneg@gmail.com"
 
+FRONTEND_URL = "http://127.0.0.1:8000/"

@@ -1,11 +1,11 @@
 
-from BLOG.models import Article,Vission,Team,About,Commentaire
+from BLOG.models import Article,Vission,Team,About,Commentaire,Tag,Categorie
 from django.core.paginator import Paginator
 from django.utils.text import slugify
 from BLOG.forms import CommentaireForm
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
-from .forms import ArticleForm
+
 
 
 
@@ -54,7 +54,7 @@ def blog_single(request, slug):
             commentaire.auteur_id = request.user
             commentaire.article_id = article
             commentaire.save()
-            return redirect('blog_single', slug=slug)  
+            return redirect('blog-single', slug=slug)  
 
     datas = {
         'active_blog': 'active',
@@ -69,6 +69,7 @@ def blog_single(request, slug):
 def update_comment(request, comment_id):
     commentaire = get_object_or_404(Commentaire, id=comment_id)
 
+    # Vérifier si l'utilisateur est l'auteur du commentaire
     if request.user != commentaire.auteur_id:
         return redirect('blog-single', slug=commentaire.article_id.slug)
 
@@ -77,8 +78,11 @@ def update_comment(request, comment_id):
         if form.is_valid():
             form.save()
             return redirect('blog-single', slug=commentaire.article_id.slug)
+    else:
+        form = CommentaireForm(instance=commentaire)  # Initialiser le formulaire avec le commentaire existant
 
     return render(request, 'update_comment.html', {'form': form, 'commentaire': commentaire})
+
 
 @login_required
 def delete_comment(request, comment_id):
@@ -116,46 +120,80 @@ def about(request):
 # Debut de la partie formulaire des articles
 
 @login_required
-def submit_article(request):
+def ajouter_article(request):
+    categories = Categorie.objects.all()
+    tags = Tag.objects.all()
+
     if request.method == "POST":
-        form = ArticleForm()
-        if form.is_valid():
-            form = ArticleForm(request.POST, request.FILES)
-            article = form.save(commit=False)
-            article.est_pulie = True  
-            article.save()
-            form.save_m2m() 
-            return redirect("blog")  
-    else:
-        form = ArticleForm()
+        titre = request.POST.get("titre")
+        couverture = request.FILES.get("couverture")
+        resume = request.POST.get("resume")
+        contenu = request.POST.get("contenu")
+        categorie_id = request.POST.get("categorie")
+        tags_ids = request.POST.getlist("tags")
+        statut = request.POST.get("statut") == "on"
+        date_publication = request.POST.get("date_publication")
+        
+        categorie = Categorie.objects.get(id=categorie_id) if categorie_id else None
+        tags_selected = Tag.objects.filter(id__in=tags_ids)
 
-    return render(request, 'soumettre_article.html', {'form': form})
+        article = Article.objects.create(
+            titre=titre,
+            couverture=couverture,
+            resume=resume,
+            contenu=contenu,
+            slug=slugify(titre),
+            statut=statut,
+            auteur_id=request.user,
+            categorie_id=categorie,
+            date_de_publication=date_publication,
+        )
+        article.tag_ids.set(tags_selected)
 
+        return redirect("index")
 
-@login_required
-def update_article(request, article_id):
-    article = get_object_or_404(Article, id=article_id)
+    return render(request, "soumettre_article.html", {"categories": categories, "tags": tags})
 
-    if request.user == article.auteur:
-        if request.method == 'POST':
-            form = ArticleForm(request.POST, request.FILES, instance=article)
-            if form.is_valid():
-                form.save()
-                return redirect('blog-single', slug=article.slug)
-        else:
-            form = ArticleForm(instance=article)
-
-        return render(request, 'blog/update_article.html', {'form': form})
-    else:
-        return redirect('blog') 
-    
 
 @login_required
-def delete_article(request, article_id):
-    article = get_object_or_404(Article, id=article_id)
+def mes_articles(request):
 
-    if request.user == article.auteur:
-        article.delete()
-        return redirect('blog')  
-    else:
-        return redirect('blog')  
+    articles = Article.objects.filter(auteur_id=request.user).order_by('-created_at')  # Récupère les articles de l'utilisateur connecté
+    categories = Categorie.objects.all()
+    tags = Tag.objects.all()
+    return render(request, "mes_articles.html", {"articles": articles,"categories": categories, "tags": tags})
+
+@login_required
+def modifier_article(request, article_id):
+    article = get_object_or_404(Article, id=article_id, auteur_id=request.user)
+
+    if request.method == "POST":
+        article.titre = request.POST.get("titre")
+        article.resume = request.POST.get("resume")
+        article.contenu = request.POST.get("contenu")
+
+        # Gestion de l'image (si un nouveau fichier est fourni)
+        if "couverture" in request.FILES:
+            article.couverture = request.FILES["couverture"]
+
+        # Mise à jour de la catégorie
+        categorie_id = request.POST.get("categorie")
+        article.categorie_id = Categorie.objects.get(id=categorie_id) if categorie_id else None
+
+        # Mise à jour des tags
+        tags_ids = request.POST.getlist("tags")
+        article.tag_ids.set(Tag.objects.filter(id__in=tags_ids))
+
+        # Mise à jour du statut de publication
+        article.statut = request.POST.get("statut") == "on"
+
+        article.save()
+        return redirect("mes_articles")
+
+    return redirect("mes_articles")
+
+@login_required
+def supprimer_article(request, article_id):
+    article = get_object_or_404(Article, id=article_id, auteur_id=request.user)
+    article.delete()
+    return redirect("mes_articles")

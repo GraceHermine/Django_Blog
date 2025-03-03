@@ -1,44 +1,61 @@
 {% extends 'base/base.html' %}
 
-{% block title %}Soumettre un article{% endblock %}
-
 {% block content %}
-<div class="container py-5">
-    <h2 class="text-center mb-4">Soumettre un nouvel article</h2>
 
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <form method="POST" enctype="multipart/form-data" class="card p-4 shadow-lg">
-                {% csrf_token %}
-
-                <div class="form-group mb-3">
-                    <label for="id_titre" class="form-label">Titre</label>
-                    {{ form.titre }}
+<div class="container mt-5 mb-4">
+    <div class="card shadow-lg p-4">
+        <h2 class="text-center mb-4">Ajouter un Article</h2>
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="titre" class="form-label">Titre</label>
+                <input type="text" class="form-control" name="titre" id="titre" placeholder="Entrez le titre de l'article" required>
+            </div>
+            <div class="mb-3">
+                <label for="couverture" class="form-label">Image de Couverture</label>
+                <input type="file" class="form-control" name="couverture" id="couverture" accept="image/*" required>
+            </div>
+            <div class="mb-3">
+                <label for="resume" class="form-label">Résumé</label>
+                <textarea class="form-control" name="resume" id="resume" rows="4" placeholder="Entrez un résumé de l'article" required></textarea>
+            </div>
+            <div class="mb-3">
+                <label for="contenu" class="form-label">Contenu</label>
+                <textarea class="form-control" name="contenu" id="contenu" rows="6" placeholder="Entrez le contenu de l'article" required></textarea>
+            </div>
+            <div class="mb-3">
+                <label for="categorie" class="form-label">Catégorie</label>
+                <select class="form-select" name="categorie" id="categorie" required>
+                    <option value="">Sélectionnez une catégorie</option>
+                    {% for categorie in categories %}
+                        <option value="{{ categorie.id }}">{{ categorie.nom }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Tags</label>
+                <div class="d-flex flex-wrap">
+                    {% for tag in tags %}
+                        <div class="form-check me-3">
+                            <input class="form-check-input" type="checkbox" name="tags" value="{{ tag.id }}" id="tag{{ tag.id }}">
+                            <label class="form-check-label" for="tag{{ tag.id }}">{{ tag.nom }}</label>
+                        </div>
+                    {% endfor %}
                 </div>
-
-                <div class="form-group mb-3">
-                    <label for="contenu" class="form-label">contenu</label>
-                    {{ form.contenu }}
-                </div>
-                
-                <div class="form-group mb-3">
-                    <label for="resume" class="form-label">resume</label>
-                    {{ form.resume }}
-                </div>
-
-                <div class="form-group mb-3">
-                    <label for="id_couverture" class="form-label">Image de couverture</label>
-                    {{ form.couverture }}
-                </div>
-
-                <div class="form-group mb-3">
-                    <label for="id_tag_ids" class="form-label">Tags</label>
-                    {{ form.tag_ids }}
-                </div>
-
-                <button type="submit" class="btn btn-primary w-100">Soumettre</button>
-            </form>
-        </div>
+            </div>
+            <div class="mb-3">
+                <label for="date_publication" class="form-label">Date de publication</label>
+                <input type="date" class="form-control" name="date_publication" id="date_publication" required>
+            </div>
+            <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" name="statut" id="statut" checked>
+                <label class="form-check-label" for="statut">Article publié</label>
+            </div>
+            <div class="d-grid">
+                <button type="submit" class="btn btn-primary">Publier l'Article</button>
+            </div>
+        </form>
     </div>
 </div>
+
 {% endblock %}

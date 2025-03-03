@@ -12,4 +12,7 @@ class ArticleForm(forms.ModelForm):
 class CommentaireForm(forms.ModelForm):
     class Meta:
         model = Commentaire
-        fields = ["contenu"]
+        fields = ['contenu']  # Permet de modifier uniquement le contenu
+        widgets = {
+            'contenu': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
+        }

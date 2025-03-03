@@ -1,62 +1,178 @@
 from django.shortcuts import render,redirect
 from django.contrib.auth import authenticate, login, logout
 from django.core.mail import send_mail
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib import messages
+from .models import PasswordResetCode
+from django.utils.timezone import now
+from django.shortcuts import get_object_or_404
+from django.urls import reverse
+from django.conf import settings
+import datetime
+import random
+import uuid
+from django.utils.crypto import get_random_string
+from django.contrib.auth.hashers import make_password
+from django.contrib.auth import get_user_model
 
 # Create your views here.
 
 def register(request):
-    if request.method=='POST':
+    if request.method == 'POST':
         email = request.POST.get('email')
         password = request.POST.get('password')
         firstname = request.POST.get('fname')
         lastname = request.POST.get('lname')
         username = request.POST.get('uname')
+
         if User.objects.filter(email=email).exists():
-            messages.warning(request,'email is already exists')
-            return redirect('register')
-        else:
-            user = User(email=email,password=password,first_name=firstname,
-            last_name=lastname,username=username)
-            user.set_password(password)
-            user.save()
-            subject = 'About Registration'
-            message = f'Hi ,You has been registered successfully on website.'
-            email_from = 'sinturana250@gmail.com'
-            rec_list = [email,]
-            response = send_mail(
-                subject,
-                message,
-                email_from,
-                rec_list,
-                fail_silently=False
-            )
-            print("UYFRUYYUBTYUTBYUTUYBGUN", response)
+            messages.warning(request, 'Cet email existe déjà.')
+            return redirect('register')  # Redirection vers la page d'inscription
+        
+        user = User.objects.create_user(
+            username=username, 
+            email=email, 
+            password=password, 
+            first_name=firstname, 
+            last_name=lastname
+        )
+        
+        # Envoi de mail de confirmation (facultatif, assure-toi que Django est bien configuré)
+        subject = 'Confirmation d’inscription'
+        message = 'Bonjour,\nVotre inscription sur notre site a été effectuée avec succès !'
+        email_from = 'dedjeneg@gmail.com'
+        send_mail(subject, message, email_from, [email], fail_silently=False)
 
-            messages.success(request, 'User has been sucessfully registered')
-            return redirect('/')
-    return render(request,'register.html')
+        messages.success(request, 'Utilisateur enregistré avec succès !')
+        return redirect('login')  # Redirection vers la page de connexion
 
+    return render(request, 'register.html')
 
 def login_user(request):
-    if request.method=='POST':
-        username = request.POST['uname']
-        password = request.POST['password']
+    if request.method == 'POST':
+        username = request.POST.get('uname', '').strip()
+        password = request.POST.get('password', '').strip()
+
+        if not username or not password:
+            messages.warning(request, 'Veuillez remplir tous les champs.')
+            return redirect('login')
+
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            return redirect('/')
+            messages.success(request, 'Connexion réussie !')
+            return redirect('index')  # Redirection vers la page principale
         else:
-            messages.warning(request,'Invalid Credentials')
+            messages.error(request, 'Identifiants incorrects.')
             return redirect('login')
-    return render(request,'login.html')
+
+    return render(request, 'login.html')
 
 
-def logout_user(request):
+
+def logout_view(request):
     logout(request)
-    return redirect('/')
+    return redirect('index')
+
+# 
+def send_mail_view(request):
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        User = get_user_model()
+
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return render(request, 'insert_email.html', {"error": "Email non trouvé."})
+
+        # Supprimer les anciens codes pour cet email
+        PasswordResetCode.objects.filter(email=email).delete()
+
+        # Générer un nouveau code et un token unique
+        code = f"{random.randint(0, 999999):06}"
+        token = str(uuid.uuid4())
+
+        # Créer un nouvel enregistrement
+        user = User.objects.get(email=email)
+        reset_obj = PasswordResetCode.objects.create(email=email, code=code, token=token, user=user)
+        # reset_obj = PasswordResetCode.objects.create(email=email, code=code, token=token)
+
+        # Construire le lien de confirmation
+        confirm_url = request.build_absolute_uri(reverse('confirm_code', args=[token]))
+        message = f"Votre code de réinitialisation est {code}. \nCliquez ici pour confirmer : {confirm_url}"
+
+        # Envoyer l'email
+        send_mail(
+            'Réinitialisation de votre mot de passe',
+            message,
+            'hermine@votresite.com',
+            [email],
+            fail_silently=False,
+        )
+
+        return redirect('confirm_code', token=reset_obj.token)
+
+    return render(request, 'insert_email.html')
 
 
 
+def confirm_code_view(request, token):
+    reset_obj = get_object_or_404(PasswordResetCode, token=token)
+    error = None
+
+    if request.method == 'POST':
+        code_input = request.POST.get('code')
+        if reset_obj.is_valid():
+            if reset_obj.code == code_input:
+                # Stocker l'email en session pour l'étape suivante
+                request.session['reset_email'] = reset_obj.user.email
+
+                # Générer l'URL de réinitialisation avec le token
+                reset_url = reverse('reset_password', kwargs={'token': str(reset_obj.token)})
+
+                # Rediriger vers la page de réinitialisation avec le token
+                return redirect(reset_url)
+            else:
+                error = "Le code saisi est incorrect."
+        else:
+            error = "Le code a expiré."
+
+    return render(request, 'verify_code.html', {'error': error, 'token': token})
+
+
+def reset_password_view(request, token):
+    try:
+        token = uuid.UUID(token)  # Convertir le token en UUID pour éviter toute erreur
+    except ValueError:
+        return redirect('send_mail')  # Redirige si le token est invalide
+
+    email = request.session.get('reset_email')
+    if not email:
+        return redirect('send_mail')
+
+    error = None
+    success = None
+
+    if request.method == 'POST':
+        password = request.POST.get('password')
+        password_confirm = request.POST.get('password_confirm')
+
+        if password != password_confirm:
+            error = "Les mots de passe ne correspondent pas."
+        else:
+            User = get_user_model()
+            try:
+                user = User.objects.get(email=email)
+                user.password = make_password(password)
+                user.save()
+                success = "Votre mot de passe a été réinitialisé avec succès."
+
+                # Supprimer les données de session
+                del request.session['reset_email']
+
+                return redirect('login')  # Redirige vers la connexion après succès
+
+            except User.DoesNotExist:
+                error = "Aucun utilisateur trouvé avec cet email."
+
+    return render(request, 'reset_password.html', {'error': error, 'success': success, 'token': token})

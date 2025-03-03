@@ -94,7 +94,7 @@
                                         <br>
 
                                         <!-- Bouton pour afficher les commentaires -->
-                                        <button id="toggle-comments" class="btn btn-primary">Afficher les commentaires</button>
+                                        <button id="toggle-comments" class="btn btn-primary">Commentaires</button>
 
                                         <!-- Section des commentaires (cachée au début) -->
                                         <div id="comment-section" style="display: none; margin-top: 20px;">
@@ -125,7 +125,7 @@
                                                             <h3 class="wow fadeInUp">Ajouter un commentaire</h3>
                                                             
                                                         </div>
-
+                                                        {% if user.is_authenticated %}
                                                         <form action="" method="POST">
                                                             {% csrf_token %}
                                                             <div class="contact-form">
@@ -133,9 +133,15 @@
                                                                     <textarea name="contenu" class="form-control" id="contenu" rows="4" placeholder="Votre commentaire*" required></textarea>
                                                                     <div class="help-block with-errors"></div>
                                                                 </div>
+                                                                
                                                                 <div class="col-md-12">
                                                                     <button type="submit" class="btn btn-primary">Publier</button>
                                                                 </div>
+                                                        {% else %}
+                                                            <div class="col-md-12">
+                                                                <button ><a href="{% url 'login' %}">Se connecter</a></button>
+                                                            </div> 
+                                                        {% endif %}
                                                             </div>
                                                         </form>
                                                     </div>
